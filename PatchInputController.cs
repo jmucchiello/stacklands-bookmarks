@@ -14,23 +14,16 @@ namespace BookmarksModNS
         {
             if (WorldManager.instance.CanInteract && BookmarksMod.instance.CurrentBoard is not null)
             {
-//                BookmarksMod.instance.SetBoard(WorldManager.instance.GetCurrentBoardSafe().Id);
                 for (int i = 0; i < BookmarksMod.instance.CurrentBoard.marks.Length; ++i) 
                 {
                     PanAndZoom pz = BookmarksMod.instance.CurrentBoard.marks[i];
-                    if (!__instance.GetKey(Key.LeftAlt) && !__instance.GetKey(Key.RightAlt) &&
-                        !__instance.GetKey(Key.LeftApple) && !__instance.GetKey(Key.RightApple) &&
-                        !__instance.GetKey(Key.LeftCommand) && !__instance.GetKey(Key.RightCommand) &&
-                        !__instance.GetKey(Key.LeftCtrl) && !__instance.GetKey(Key.RightCtrl)
-                       )
+                    if (__instance.GetKeyDown(pz.key))
                     {
-                        if (__instance.GetKeyDown(pz.key) && (__instance.GetKey(Key.LeftShift) || __instance.GetKey(Key.RightShift)))
+                        ShiftKeys.Result result = ShiftKeys.TestShiftStatus(__instance);
+                        switch (result)
                         {
-                            pz.Set();
-                        }
-                        else if (__instance.GetKeyDown(pz.key))
-                        {
-                            pz.Jump();
+                            case ShiftKeys.Result.None: pz.Jump(); break;
+                            case ShiftKeys.Result.Meta: pz.Set(); break;
                         }
                     }
                 }

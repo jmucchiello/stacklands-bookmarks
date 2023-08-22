@@ -35,21 +35,21 @@ namespace BookmarksModNS
     [JsonObject(MemberSerialization.Fields)]
     public class SavePanAndZoom
     {
+        public int idx;
         public float x;
         public float y;
         public float z;
-        public bool isSet;
-        public SavePanAndZoom(PanAndZoom pz)
+        public SavePanAndZoom(int index, PanAndZoom pz)
         {
+            idx = index;
             x = pz.zoom.x;
             y = pz.zoom.y; 
             z = pz.zoom.z;
-            isSet = pz.IsSet;
         }
 
         public PanAndZoom ToPanAndZoom()
         {
-            return new() { IsSet = isSet, zoom = new Vector3(x, y, z) };
+            return new() { IsSet = true, zoom = new Vector3(x, y, z) };
         }
     }
 }

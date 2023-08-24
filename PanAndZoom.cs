@@ -18,15 +18,24 @@ namespace BookmarksModNS
 
         public void Set()
         {
-            zoom = GameCamera.instance.transform.position;
-            BookmarksMod.instance.Log($"Remember ({zoom.x},{zoom.y},{zoom.z})");
-            IsSet = true;
+            if (WorldManager.instance.CanInteract)
+            {
+                zoom = GameCamera.instance.transform.position;
+                IsSet = true;
+                AudioManager.me.PlaySound(AudioManager.me.Click, zoom, UnityEngine.Random.Range(0.8f, 1.2f), 0.7f);
+                BookmarksMod.instance.Log($"Remember ({zoom.x},{zoom.y},{zoom.z})");
+            }
         }
         public void Jump()
         {
             if (IsSet && WorldManager.instance.CanInteract)
             {
                 BookmarksMod.instance.Log($"JumpTo ({zoom.x},{zoom.y},{zoom.z})");
+                if (BookmarksMod.instance.playList.Cliplist.Count() > 0)
+                {
+                    AudioManager.me.PlaySound(BookmarksMod.instance.playList.Cliplist,
+                        zoom, UnityEngine.Random.Range(0.8f, 1.2f), 0.7f);
+                }
                 Traverse.Create(GameCamera.instance).Field("cameraTargetPosition").SetValue(zoom);
             }
         }

@@ -36,18 +36,29 @@ namespace BookmarksModNS
             };
         }
 
+        public PlayList playList = new PlayList();
+        //private Task<int> audioCount;
+        private void LoadAudio()
+        {
+            int audioCount = playList.Start(Path + "\\Sounds");
+        }
+
         private void Awake()
         {
+            Logger.Log($"Path = {Path}");
             instance = this;
+            LoadAudio();
             SetupConfiguration();
             Harmony.PatchAll();
         }
         public override void Ready()
         {
             instance = this;
-            Logger.Log($"Ready!");
             ShiftKeys.defaultMode = useControl.Value ? ShiftKeys.Mode.Ctrl : ShiftKeys.defaultMode = ShiftKeys.Mode.Shift;
-            BookmarksMod.instance.Log($"Set mark using {ShiftKeys.defaultMode}");
+            Log($"Set mark using {ShiftKeys.defaultMode}");
+//            audioCount.Wait();
+//            Log($"Count = {audioCount.Result}");
+            Log($"Ready!");
         }
 
         public void SetBoard(string id)
@@ -91,9 +102,9 @@ namespace BookmarksModNS
         public Dictionary<string, Board> ToMod()
         {
             Dictionary<string, Board> realBoards = new();
-            foreach (SaveBoard n in boards)
+            foreach (SaveBoard sb in boards)
             {
-                realBoards[n.id] = n.ToBoard();
+                realBoards[sb.id] = sb.ToBoard();
             }
             return realBoards;
         }

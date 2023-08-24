@@ -55,21 +55,21 @@ namespace BookmarksModNS
             {
                 if (board.marks[i].IsSet)
                 {
-                    SavePanAndZoom pz = new(i, board.marks[i]);
-                    marks.Add(pz);
+                    SavePanAndZoom spz = new(i, board.marks[i]);
+                    marks.Add(spz);
                 }
             }
         }
 
         public Board ToBoard()
         {
-            Board board = new();
-            board.Id = id;
-            if (marks == null) return board;
-            foreach (SavePanAndZoom pz in marks)
+            Board board = new()
             {
+                Id = id
+            };
+            marks?.ForEach(pz => {
                 board.marks[pz.idx] = pz.ToPanAndZoom();
-            }
+            });
             board.UpdateKeys();
             return board;
         }

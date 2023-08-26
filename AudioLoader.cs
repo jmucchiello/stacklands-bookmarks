@@ -8,63 +8,67 @@ namespace BookmarksModNS
 {
     public class PlayList
     {
-        public List<AudioClip> Cliplist = new();
+        public List<AudioClip> ClipList = new();
+        public List<string> NameList = new();
 
-        public List<string> audioname = new();
-
-//        public async Task<int> Start(string path)
         public int Start(string path)
         {
-            int count = 0;
             if (Directory.Exists(path))
             {
                 DirectoryInfo info = new DirectoryInfo(path);
-
+                List<string> filelist = new List<string>();
                 foreach (FileInfo item in info.GetFiles("*.wav"))
                 {
-                    audioname.Add(item.Name);
+                    filelist.Add(item.Name);
                 }
-                this.path = path.Replace("\\","/");
-                count = LoadAudioFile();
+                path = path.Replace("\\","/");
+                if (!path.EndsWith("/")) path += "/";
+                ClipList = LoadAudioFile(path, filelist);
+                NameList = filelist;
             }
             else
             {
                 BookmarksMod.instance.Log($"PlayList.Start: Invalid path: {path}");
             }
-            return count;
+            return ClipList.Count;
         }
 
-        string path;
-
-//        async Task<int> LoadAudioFile()
-        int LoadAudioFile()
+        List<AudioClip> LoadAudioFile(string path, List<string> filelist)
         {
-            BookmarksMod.instance.Log($"LoadAudioFiles count {audioname.Count}");
-            int count = 0;
-            for (int i = 0; i < audioname.Count; i++)
+            BookmarksMod.instance.Log($"LoadAudioFiles count {filelist.Count}");
+            List<AudioClip> clips = new List<AudioClip>();
+            foreach (string file in filelist)
             {
-                string filepath = path + string.Format("/{0}", audioname[i]);
+                string filepath = path + string.Format("{0}", file);
                 BookmarksMod.instance.Log("Loading " + filepath);
                 using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(filepath, AudioType.WAV))
                 {
                     var result = www.SendWebRequest();
-
                     while (!result.isDone) { Task.Delay(50); }
 
                     if (www.result == UnityWebRequest.Result.ConnectionError)
                     {
                         BookmarksMod.instance.Log(www.error);
+                        filelist.Remove(file);
                     }
                     else
                     {
-                        AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
-                        clip.name = audioname[i];
-                        Cliplist.Add(clip);
-                        ++count;
+                        try
+                        {
+                            AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+                            clip.name = file;
+                            clips.Add(clip);
+                        }
+                        catch (Exception e)
+                        {
+                            filelist.Remove(file);
+                            BookmarksMod.instance.Log($"Exception while load {file}");
+                            BookmarksMod.instance.Log(e.ToString());
+                        }
                     }
                 }
             }
-            return count;
+            return clips;
         }
     }
 }

@@ -60,14 +60,4 @@ namespace BookmarksModNS
             }
         }
     }
-
-    [HarmonyPatch(typeof(WorldManager),nameof(WorldManager.StartNewRound))]
-    internal class PatchStartNewRound
-    {
-        public static void Postfix(WorldManager __instance)
-        {
-            BookmarksMod.instance.boards = new();
-            BookmarksMod.instance.SetBoard("main");
-        }
-    }
 }

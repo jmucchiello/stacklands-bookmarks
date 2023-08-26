@@ -80,8 +80,5 @@
     <Reference Include="UnityEngine.UnityWebRequestModule">
       <HintPath>..\..\Program Files (x86)\Steam\steamapps\common\Stacklands\Stacklands_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestWWWModule">
-      <HintPath>..\..\Program Files (x86)\Steam\steamapps\common\Stacklands\Stacklands_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>

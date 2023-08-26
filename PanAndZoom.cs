@@ -31,10 +31,12 @@ namespace BookmarksModNS
             if (IsSet && WorldManager.instance.CanInteract)
             {
                 BookmarksMod.instance.Log($"JumpTo ({zoom.x},{zoom.y},{zoom.z})");
-                if (BookmarksMod.instance.playList.Cliplist.Count() > 0)
+                if (BookmarksMod.instance.playList.ClipList.Count() > 0)
                 {
-                    AudioManager.me.PlaySound(BookmarksMod.instance.playList.Cliplist,
-                        zoom, UnityEngine.Random.Range(0.8f, 1.2f), 0.7f);
+                    float distance = Vector3.Distance(GameCamera.instance.transform.position, zoom);
+                    BookmarksMod.instance.Log($"Swoosh distance {distance}");
+                    AudioManager.me.PlaySound(BookmarksMod.instance.playList.ClipList,
+                        zoom, UnityEngine.Random.Range(0.8f, 1.2f), MathF.Min(distance/3.0f,0.7f));
                 }
                 Traverse.Create(GameCamera.instance).Field("cameraTargetPosition").SetValue(zoom);
             }

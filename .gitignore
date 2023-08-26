@@ -3,3 +3,4 @@ obj/
 *.user
 Icon Sources/
 *.bbcode
+.vs/

@@ -3,42 +3,34 @@ using System.Collections.Generic;
 using System.Text;
 using HarmonyLib;
 using Newtonsoft.Json;
+using CommonModNS;
 
 namespace BookmarksModNS
 {
-    [HarmonyPatch(typeof(WorldManager), nameof(WorldManager.LoadSaveRound))]
-    internal class PatchLoadSaveRound
+    public partial class BookmarksMod : Mod
     {
-        public static void Prefix(WorldManager __instance, SaveRound saveRound)
+        private void WM_OnLoad(WorldManager wm, SaveRound saveRound)
         {
             try
             {
                 SerializedKeyValuePair pair = SerializedKeyValuePairHelper.GetWithKey(saveRound.ExtraKeyValues, "blueprintmod_runtime");
                 if (pair != null)
                 {
-                    BookmarksMod.instance.Log($"LoadSaveRound Save Data:\r\n{pair.Value}");
-                    BookmarksMod.instance.boards = JsonConvert.DeserializeObject<SaveMod>(pair.Value)!.ToMod();
-                    BookmarksMod.instance.Log($"LoadSaveRound Save Data Loaded");
+                    Log($"LoadSaveRound Save Data:\r\n{pair.Value}");
+                    boards = JsonConvert.DeserializeObject<SaveMod>(pair.Value)!.ToMod();
+                    Log($"LoadSaveRound Save Data Loaded");
                 }
             }
             catch (Exception e)
             {
-                BookmarksMod.instance.Log($"SaveModData encountered an exception");
-                BookmarksMod.instance.Log(e.StackTrace);
+                Log($"SaveModData encountered an exception");
+                Log(e.StackTrace);
             }
+            Log("LoadSaveRound calling SetBoard");
+            SetBoard(wm.CurrentBoard.Id);
         }
 
-        public static void Postfix(WorldManager __instance, SaveRound saveRound)
-        {
-            BookmarksMod.instance.Log("LoadSaveRound calling SetBoard");
-            BookmarksMod.instance.SetBoard(__instance.CurrentBoard.Id);
-        }
-    }
-
-    [HarmonyPatch(typeof(WorldManager), nameof(WorldManager.GetSaveRound))]
-    internal class PatchGetSaveRound
-    {
-        public static void Postfix(WorldManager __instance, SaveRound __result)
+        private void WM_OnSave(WorldManager wm, SaveRound saveRound)
         {
             try
             {
@@ -48,16 +40,22 @@ namespace BookmarksModNS
                 {
                     using (JsonWriter writer = new JsonTextWriter(tw))
                     {
-                        serializer.Serialize(writer, new SaveMod(BookmarksMod.instance.boards));
+                        serializer.Serialize(writer, new SaveMod(boards));
                     }
-                    BookmarksMod.instance.Log($"GetSaveRound Save Data:\r\n{tw}");
-                    SerializedKeyValuePairHelper.SetOrAdd(__result.ExtraKeyValues, "blueprintmod_runtime", tw.ToString());
+                    Log($"GetSaveRound Save Data:\r\n{tw}");
+                    SerializedKeyValuePairHelper.SetOrAdd(saveRound.ExtraKeyValues, "blueprintmod_runtime", tw.ToString());
                 }
             }
             catch (Exception e)
             {
-                BookmarksMod.instance.Log($"LoadModData encountered an exception\r\n{e.StackTrace}");
+                Log($"LoadModData encountered an exception\r\n{e.StackTrace}");
             }
+        }
+
+        private void WM_OnNewGame(WorldManager wm)
+        {
+            boards = new();
+            SetBoard(global::Board.Mainland);
         }
     }
 }

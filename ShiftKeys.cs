@@ -9,9 +9,8 @@ namespace BookmarksModNS
     internal class ShiftKeys
     {
         public enum Result { None, Meta, OtherMetas };
-        public enum Mode { Shift, Ctrl, Alt };
 
-        public static Mode defaultMode = Mode.Shift;
+        public static ModifierKey defaultMode = ModifierKey.SHIFT;
 
         public static Result TestShiftStatus(InputController controller)
         {
@@ -42,7 +41,7 @@ namespace BookmarksModNS
             return Result.None;
         };
 
-        private static Func<InputController, Result> macCommandCheck = delegate(InputController controller)  {
+        private static Func<InputController, Result> macCommandCheck = delegate (InputController controller) {
             if (controller.GetKey(Key.LeftApple) || controller.GetKey(Key.RightApple) ||
                 controller.GetKey(Key.LeftCtrl) || controller.GetKey(Key.RightCtrl) ||
                 controller.GetKey(Key.LeftShift) || controller.GetKey(Key.RightShift)) return Result.OtherMetas;
@@ -50,18 +49,35 @@ namespace BookmarksModNS
             return Result.None;
         };
 
-        private static Func<InputController, Result> cachedFunc;
-        private static Mode cachedMode;
+        private static Func<InputController, Result> pcAltCheck = delegate (InputController controller) {
+            if (controller.GetKey(Key.LeftCtrl) || controller.GetKey(Key.RightCtrl) ||
+                controller.GetKey(Key.LeftWindows) || controller.GetKey(Key.RightWindows) ||
+                controller.GetKey(Key.LeftShift) || controller.GetKey(Key.RightShift)) return Result.OtherMetas;
+            if (controller.GetKey(Key.LeftAlt) || controller.GetKey(Key.RightAlt)) return Result.Meta;
+            return Result.None;
+        };
 
-        private static Func<InputController, Result> GetTest(Mode mode)
+        private static Func<InputController, Result> macAltCheck = delegate(InputController controller)  {
+            if (controller.GetKey(Key.LeftApple) || controller.GetKey(Key.RightApple) ||
+                controller.GetKey(Key.LeftCtrl) || controller.GetKey(Key.RightCtrl) ||
+                controller.GetKey(Key.LeftShift) || controller.GetKey(Key.RightShift)) return Result.OtherMetas;
+            if (controller.GetKey(Key.LeftAlt) || controller.GetKey(Key.RightAlt)) return Result.Meta;
+            return Result.None;
+        };
+
+        private static Func<InputController, Result> cachedFunc;
+        private static ModifierKey cachedMode;
+
+        private static Func<InputController, Result> GetTest(ModifierKey mode)
         {
             if (cachedFunc == null || cachedMode != mode)
             {
                 RuntimePlatform platform = Application.platform;
                 cachedFunc = mode switch
                 {
-                    Mode.Shift => platform == RuntimePlatform.WindowsPlayer ? pcShiftCheck : macShiftCheck,
-                    Mode.Ctrl => platform == RuntimePlatform.WindowsPlayer ? pcControlCheck : macCommandCheck,
+                    ModifierKey.SHIFT => platform == RuntimePlatform.WindowsPlayer ? pcShiftCheck : macShiftCheck,
+                    ModifierKey.CONTROL => platform == RuntimePlatform.WindowsPlayer ? pcControlCheck : macCommandCheck,
+                    ModifierKey.ALT => platform == RuntimePlatform.WindowsPlayer ? pcAltCheck : macAltCheck,
                     _ => pcShiftCheck,
                 };
                 cachedMode = mode;

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using CommonModNS;
 
 namespace BookmarksModNS
 {
@@ -23,9 +24,12 @@ namespace BookmarksModNS
                 zoom = GameCamera.instance.transform.position;
                 IsSet = true;
                 AudioManager.me.PlaySound(AudioManager.me.Click, zoom, UnityEngine.Random.Range(0.8f, 1.2f), 0.7f);
-                BookmarksMod.instance.Log($"Remember ({zoom.x},{zoom.y},{zoom.z})");
+                BookmarksMod.instance.Trace($"Remember ({zoom.x},{zoom.y},{zoom.z}) worldSize ({I.WM.DetermineTargetWorldSize(I.WM.CurrentBoard)})");
             }
         }
+
+        private static Traverse<Vector3> cameraTargetPosition = Traverse.Create(GameCamera.instance).Field<Vector3>("cameraTargetPosition");
+
         public void Jump()
         {
             if (IsSet && WorldManager.instance.CanInteract)
@@ -38,7 +42,7 @@ namespace BookmarksModNS
                     AudioManager.me.PlaySound(BookmarksMod.instance.playList.ClipList,
                         zoom, UnityEngine.Random.Range(0.8f, 1.2f), MathF.Min(distance/3.0f,0.7f));
                 }
-                Traverse.Create(GameCamera.instance).Field("cameraTargetPosition").SetValue(zoom);
+                cameraTargetPosition.Value = zoom;
             }
         }
     }

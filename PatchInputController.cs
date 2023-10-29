@@ -20,10 +20,17 @@ namespace BookmarksModNS
                     if (__instance.GetKeyDown(pz.key))
                     {
                         ShiftKeys.Result result = ShiftKeys.TestShiftStatus(__instance);
-                        switch (result)
+                        try
                         {
-                            case ShiftKeys.Result.None: pz.Jump(); break;
-                            case ShiftKeys.Result.Meta: pz.Set(); break;
+                            switch (result)
+                            {
+                                case ShiftKeys.Result.None: pz.Jump(); break;
+                                case ShiftKeys.Result.Meta: pz.Set(); break;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogException(e);
                         }
                     }
                 }

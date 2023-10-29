@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using HarmonyLib;
 using UnityEngine.InputSystem;
+using CommonModNS;
 
 namespace BookmarksModNS
 {
@@ -11,18 +12,8 @@ namespace BookmarksModNS
     {
         public static void Postfix(WorldManager __instance, GameBoard newBoard, Action onComplete, string transitionId)
         {
-            BookmarksMod.instance.Log($"GoToBoard({newBoard.Id}) calling SetBoard");
+            I.Log($"GoToBoard({newBoard.Id}) calling SetBoard");
             BookmarksMod.instance.SetBoard(newBoard.Id);
-        }
-    }
-
-    [HarmonyPatch(typeof(WorldManager), nameof(WorldManager.StartNewRound))]
-    internal class PatchStartNewRound
-    {
-        public static void Postfix(WorldManager __instance)
-        {
-            BookmarksMod.instance.boards = new();
-            BookmarksMod.instance.SetBoard(global::Board.Mainland);
         }
     }
 }

@@ -1,3 +1,11 @@
 Term	Notes	English
-bookmarksmod_config_cntrl_pc		Use control key instead of shift to set a bookmark
-bookmarksmod_config_cntrl_mac		Use control key instead of shift to set a bookmark
+bookmarksmod_modifierkey		Modifier Key
+bookmarksmod_modifierkey_tooltip		Press the modifier key and number key (5,6,7,8,9, or 0) together to set a bookmark.#Press the number by itself to jump to the bookmark.
+bookmarksmod_modifier_SHIFT_win		Shift Key
+bookmarksmod_modifier_CONTROL_win		Control Key
+bookmarksmod_modifier_ALT_win		Alt Key
+bookmarksmod_modifier_SHIFT_mac		Shift Key
+bookmarksmod_modifier_CONTROL_mac		Command Key
+bookmarksmod_modifier_ALT_mac		Option Key
+bookmarksmod_jumptozero		Jump to "zero" on load
+bookmarksmod_jumptozero_tooltip		When enabled, if a bookmark is set on the "0" key, the camera#will jump to that bookmark when the game board loads.

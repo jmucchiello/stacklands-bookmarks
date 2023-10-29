@@ -5,35 +5,85 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using CommonModNS;
 
 namespace BookmarksModNS
 {
-    public class BookmarksMod : Mod
+    public enum ModifierKey { SHIFT, CONTROL, ALT }
+
+    public partial class BookmarksMod : Mod
     {
         public static BookmarksMod instance;
+
+        public static ModifierKey ModifierKey
+        {
+            get => instance?.modifierKey.Value ?? ModifierKey.SHIFT;
+            private set
+            {
+                if (instance?.modifierKey != null)
+                    instance.modifierKey.Value = value;
+            }
+        }
+
+        public static bool JumpToZero
+        {
+            get => instance?.jumpToZero.Value ?? false;
+            private set
+            {
+                if (instance?.jumpToZero != null)
+                    instance.jumpToZero.Value = value;
+            }
+        }
 
         public Board CurrentBoard { get; private set; }
 
         public Dictionary<string, Board> boards = new();
 
-        public ConfigEntry<bool> useControl;
+        private ConfigToggledEnum<ModifierKey> modifierKey;
+        private ConfigEntryBool jumpToZero;
 
         private void SetupConfiguration()
         {
             RuntimePlatform platform = Application.platform;
-            string nameTerm = platform switch
+            modifierKey = new("bookmarksmod_modifierkey", Config, ModifierKey.SHIFT, new ConfigUI()
             {
-                RuntimePlatform.WindowsPlayer => "bookmarksmod_config_cntrl_pc",
-                RuntimePlatform.OSXPlayer => "bookmarksmod_config_cntrl_mac",
-                _ => "bookmarksmod_config_cntrl_pc",
+                NameTerm = "bookmarksmod_modifierkey",
+                TooltipTerm = "bookmarksmod_modifierkey_tooltip",
+                OnUI = delegate (ConfigEntryBase b)
+                {
+                    if (Config.Data.TryGetValue("bookmarksmod_config_cntrl", out JToken oldValue))
+                    {
+                        if (oldValue.HasValues && oldValue.Value<bool>())
+                        {
+                            modifierKey.Value = ModifierKey.CONTROL;
+                            Config.Data.Remove("bookmarksmod_config_cntrl");
+                        }
+                    }
+                }
+            })
+            {
+                currentValueColor = Color.blue,
+                onDisplayEnumText = delegate (ModifierKey value)
+                {
+                    string plat = platform == RuntimePlatform.OSXPlayer ? "mac" : "win";
+                    return I.Xlat($"bookmarksmod_modifier_{value}_{plat}");
+                }
             };
+            jumpToZero = new("bookmarksmod_jumptozero", Config, false, new()
+            {
+                NameTerm = "bookmarksmod_jumptozero",
+                TooltipTerm = "bookmarksmod_jumptozero_tooltip"
+            })
+            {
+                currentValueColor = Color.blue
+            };
+            Config.OnSave = ApplyConfig;
+        }
 
-            useControl = Config.GetEntry<bool>("bookmarksmod_config_cntrl", false, new ConfigUI() { NameTerm = nameTerm });
-            useControl.OnChanged = (bool value) => {
-                ShiftKeys.defaultMode = (value) ? ShiftKeys.Mode.Ctrl : ShiftKeys.defaultMode = ShiftKeys.Mode.Shift;
-                ShiftKeys.Reset();
-                BookmarksMod.instance.Log($"Set mark using {ShiftKeys.defaultMode}");
-            };
+        private void ApplyConfig()
+        {
+            ShiftKeys.Reset();
+            ShiftKeys.defaultMode = modifierKey.Value;
         }
 
         public PlayList playList = new PlayList();
@@ -49,15 +99,20 @@ namespace BookmarksModNS
             instance = this;
             LoadAudio();
             SetupConfiguration();
+            WorldManagerPatches.GetSaveRound += WM_OnSave;
+            WorldManagerPatches.LoadSaveRound += WM_OnLoad;
+            WorldManagerPatches.StartNewRound += WM_OnNewGame;
+            WorldManagerPatches.Update += WM_Update;
+            WorldManagerPatches.ApplyPatches(Harmony);
             Harmony.PatchAll();
         }
         public override void Ready()
         {
             instance = this;
-            ShiftKeys.defaultMode = useControl.Value ? ShiftKeys.Mode.Ctrl : ShiftKeys.defaultMode = ShiftKeys.Mode.Shift;
+            ApplyConfig();
             Log($"Set mark using {ShiftKeys.defaultMode}");
-//            audioCount.Wait();
-//            Log($"Count = {audioCount.Result}");
+            //            audioCount.Wait();
+            //            Log($"Count = {audioCount.Result}");
             Log($"Ready!");
         }
 
@@ -67,6 +122,14 @@ namespace BookmarksModNS
             if (boards.TryGetValue(id, out Board board))
             {
                 CurrentBoard = board;
+                if (JumpToZero)
+                {
+                    CurrentBoard.UpdateKeys();
+                    PanAndZoom paz = board.marks.FirstOrDefault(x => x.key == Key.Digit0);
+                    Log($"SetBoard {(paz != null ? paz.zoom.ToString() : "null")}");
+                    paz?.Jump();
+                    I.WM.CurrentBoard.StartCoroutine(jump(paz));
+                }
             }
             else
             {
@@ -77,6 +140,24 @@ namespace BookmarksModNS
         public void Log(string msg)
         {
             Logger.Log(msg);
+        }
+
+        public static IEnumerator jump(PanAndZoom paz)
+        {
+            yield return null;
+            paz?.Jump();
+        }
+
+        private readonly static List<string> traces = new List<string>();
+        private void WM_Update(WorldManager _)
+        {
+            foreach (string s in traces)
+                Log(s);
+            traces.Clear();
+        }
+        public void Trace(string msg)
+        {
+            traces.Add(msg);
         }
     }
 

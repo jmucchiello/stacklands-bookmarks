@@ -28,19 +28,19 @@ namespace BookmarksModNS
             }
             else
             {
-                BookmarksMod.instance.Log($"PlayList.Start: Invalid path: {path}");
+                BookmarksMod.Log($"PlayList.Start: Invalid path: {path}");
             }
             return ClipList.Count;
         }
 
         List<AudioClip> LoadAudioFile(string path, List<string> filelist)
         {
-            BookmarksMod.instance.Log($"LoadAudioFiles count {filelist.Count}");
+            BookmarksMod.Log($"LoadAudioFiles count {filelist.Count}");
             List<AudioClip> clips = new List<AudioClip>();
             foreach (string file in filelist)
             {
                 string filepath = path + string.Format("{0}", file);
-                BookmarksMod.instance.Log("Loading " + filepath);
+                BookmarksMod.Log("Loading " + filepath);
                 using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(filepath, AudioType.WAV))
                 {
                     var result = www.SendWebRequest();
@@ -48,7 +48,7 @@ namespace BookmarksModNS
 
                     if (www.result == UnityWebRequest.Result.ConnectionError)
                     {
-                        BookmarksMod.instance.Log(www.error);
+                        BookmarksMod.Log(www.error);
                         filelist.Remove(file);
                     }
                     else
@@ -62,8 +62,8 @@ namespace BookmarksModNS
                         catch (Exception e)
                         {
                             filelist.Remove(file);
-                            BookmarksMod.instance.Log($"Exception while load {file}");
-                            BookmarksMod.instance.Log(e.ToString());
+                            BookmarksMod.Log($"Exception {e.Message} while load {file}");
+                            BookmarksMod.Log(e.StackTrace);
                         }
                     }
                 }

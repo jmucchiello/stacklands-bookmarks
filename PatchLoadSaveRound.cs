@@ -4,6 +4,8 @@ using System.Text;
 using HarmonyLib;
 using Newtonsoft.Json;
 using CommonModNS;
+using UnityEngine.InputSystem;
+using System.Collections;
 
 namespace BookmarksModNS
 {
@@ -23,12 +25,18 @@ namespace BookmarksModNS
             }
             catch (Exception e)
             {
-                Log($"SaveModData encountered an exception");
+                Log($"SaveModData encountered an exception {e.Message}");
                 Log(e.StackTrace);
             }
             Log("LoadSaveRound calling SetBoard");
-            SetBoard(wm.CurrentBoard.Id);
+            GoToBoard = wm.CurrentBoard.Id;
         }
+
+        /// <summary>
+        /// Set in GoToBoard_Patch. Executed here as GoToBoard calls GetSaveRound.
+        /// Easier to do this than to patch a delegate function
+        /// </summary>
+        public string GoToBoard = null; 
 
         private void WM_OnSave(WorldManager wm, SaveRound saveRound)
         {
@@ -55,7 +63,7 @@ namespace BookmarksModNS
         private void WM_OnNewGame(WorldManager wm)
         {
             boards = new();
-            SetBoard(global::Board.Mainland);
+            GoToBoard = global::Board.Mainland;
         }
     }
 }

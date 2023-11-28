@@ -68,20 +68,20 @@ namespace BookmarksModNS
         private static Func<InputController, Result> cachedFunc;
         private static ModifierKey cachedMode;
 
-        private static Func<InputController, Result> GetTest(ModifierKey mode)
+        private static Func<InputController, Result> GetTest(ModifierKey meta)
         {
-            if (cachedFunc == null || cachedMode != mode)
+            if (cachedFunc == null || cachedMode != meta)
             {
                 RuntimePlatform platform = Application.platform;
-                cachedFunc = mode switch
+                cachedFunc = meta switch
                 {
                     ModifierKey.SHIFT => platform == RuntimePlatform.WindowsPlayer ? pcShiftCheck : macShiftCheck,
                     ModifierKey.CONTROL => platform == RuntimePlatform.WindowsPlayer ? pcControlCheck : macCommandCheck,
                     ModifierKey.ALT => platform == RuntimePlatform.WindowsPlayer ? pcAltCheck : macAltCheck,
                     _ => pcShiftCheck,
                 };
-                cachedMode = mode;
-//                BookmarksMod.instance.Log($"ShiftKeys set {cachedMode} {cachedFunc}");
+                cachedMode = meta;
+                //BookmarksMod.instance.Log($"ShiftKeys set {cachedMode} {cachedFunc}");
             }
             return cachedFunc;
         }

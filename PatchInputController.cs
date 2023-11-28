@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using CommonModNS;
 using UnityEngine;
 using HarmonyLib;
 using UnityEngine.InputSystem;
@@ -12,11 +12,10 @@ namespace BookmarksModNS
     {
         public static void Postfix(InputController __instance)
         {
-            if (WorldManager.instance.CanInteract && BookmarksMod.instance.CurrentBoard is not null)
+            if (I.WM.CanInteract && BookmarksMod.instance.CurrentBoard != null)
             {
-                for (int i = 0; i < BookmarksMod.instance.CurrentBoard.marks.Length; ++i) 
+                foreach (PanAndZoom pz in BookmarksMod.instance.CurrentBoard.marks)
                 {
-                    PanAndZoom pz = BookmarksMod.instance.CurrentBoard.marks[i];
                     if (__instance.GetKeyDown(pz.key))
                     {
                         ShiftKeys.Result result = ShiftKeys.TestShiftStatus(__instance);

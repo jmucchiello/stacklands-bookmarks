@@ -14,7 +14,14 @@ namespace BookmarksModNS
     public partial class BookmarksMod : Mod
     {
         public static BookmarksMod instance;
+        public static void Log(string msg) => instance.Logger.Log(msg);
 
+        public Board CurrentBoard { get; private set; }
+
+        public Dictionary<string, Board> boards = new();
+
+
+        // CONFIG Helpers
         public static ModifierKey ModifierKey
         {
             get => instance?.modifierKey.Value ?? ModifierKey.SHIFT;
@@ -34,10 +41,6 @@ namespace BookmarksModNS
                     instance.jumpToZero.Value = value;
             }
         }
-
-        public Board CurrentBoard { get; private set; }
-
-        public Dictionary<string, Board> boards = new();
 
         private ConfigToggledEnum<ModifierKey> modifierKey;
         private ConfigEntryBool jumpToZero;
@@ -95,8 +98,8 @@ namespace BookmarksModNS
 
         private void Awake()
         {
-            Logger.Log($"Path = {Path}");
             instance = this;
+            Log($"Path = {Path}");
             LoadAudio();
             SetupConfiguration();
             WorldManagerPatches.GetSaveRound += WM_OnSave;
@@ -104,6 +107,7 @@ namespace BookmarksModNS
             WorldManagerPatches.StartNewRound += WM_OnNewGame;
             WorldManagerPatches.Update += WM_Update;
             WorldManagerPatches.ApplyPatches(Harmony);
+            Log("Calling Harmony.PatchAll()");
             Harmony.PatchAll();
         }
         public override void Ready()
@@ -126,9 +130,8 @@ namespace BookmarksModNS
                 {
                     CurrentBoard.UpdateKeys();
                     PanAndZoom paz = board.marks.FirstOrDefault(x => x.key == Key.Digit0);
-                    Log($"SetBoard {(paz != null ? paz.zoom.ToString() : "null")}");
+                    //Log($"SetBoard {(paz != null ? paz.zoom.ToString() : "null")}");
                     paz?.Jump();
-                    I.WM.CurrentBoard.StartCoroutine(jump(paz));
                 }
             }
             else
@@ -137,23 +140,17 @@ namespace BookmarksModNS
             }
         }
 
-        public void Log(string msg)
-        {
-            Logger.Log(msg);
-        }
-
-        public static IEnumerator jump(PanAndZoom paz)
-        {
-            yield return null;
-            paz?.Jump();
-        }
-
         private readonly static List<string> traces = new List<string>();
         private void WM_Update(WorldManager _)
         {
             foreach (string s in traces)
                 Log(s);
             traces.Clear();
+            if (!String.IsNullOrEmpty(GoToBoard) && !TransitionScreen.InTransition && !I.WM.InAnimation)
+            {
+                SetBoard(GoToBoard);
+                GoToBoard = null;
+            }
         }
         public void Trace(string msg)
         {

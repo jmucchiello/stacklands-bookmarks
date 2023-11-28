@@ -10,10 +10,9 @@ namespace BookmarksModNS
     [HarmonyPatch(typeof(WorldManager),"GoToBoard")]
     public class PatchGoToBoard
     {
-        public static void Postfix(WorldManager __instance, GameBoard newBoard, Action onComplete, string transitionId)
+        public static void Prefix(WorldManager __instance, GameBoard newBoard, Action onComplete, string transitionId)
         {
-            I.Log($"GoToBoard({newBoard.Id}) calling SetBoard");
-            BookmarksMod.instance.SetBoard(newBoard.Id);
+            BookmarksMod.instance.GoToBoard = newBoard.Id;
         }
     }
 }

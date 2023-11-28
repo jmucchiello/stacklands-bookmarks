@@ -19,12 +19,12 @@ namespace BookmarksModNS
 
         public void Set()
         {
-            if (WorldManager.instance.CanInteract)
+            if (I.WM.CanInteract)
             {
                 zoom = GameCamera.instance.transform.position;
                 IsSet = true;
                 AudioManager.me.PlaySound(AudioManager.me.Click, zoom, UnityEngine.Random.Range(0.8f, 1.2f), 0.7f);
-                BookmarksMod.instance.Trace($"Remember ({zoom.x},{zoom.y},{zoom.z}) worldSize ({I.WM.DetermineTargetWorldSize(I.WM.CurrentBoard)})");
+                //BookmarksMod.instance.Trace($"Remember ({zoom.x},{zoom.y},{zoom.z}) worldSize ({I.WM.DetermineTargetWorldSize(I.WM.CurrentBoard)})");
             }
         }
 
@@ -34,11 +34,11 @@ namespace BookmarksModNS
         {
             if (IsSet && WorldManager.instance.CanInteract)
             {
-                BookmarksMod.instance.Log($"JumpTo ({zoom.x},{zoom.y},{zoom.z})");
+                //BookmarksMod.Log($"JumpTo ({zoom.x},{zoom.y},{zoom.z})");
                 if (BookmarksMod.instance.playList.ClipList.Count() > 0)
                 {
                     float distance = Vector3.Distance(GameCamera.instance.transform.position, zoom);
-                    BookmarksMod.instance.Log($"Swoosh distance {distance}");
+                    //BookmarksMod.Log($"Swoosh distance {distance}");
                     AudioManager.me.PlaySound(BookmarksMod.instance.playList.ClipList,
                         zoom, UnityEngine.Random.Range(0.8f, 1.2f), MathF.Min(distance/3.0f,0.7f));
                 }
